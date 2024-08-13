@@ -107,118 +107,11 @@ async def help(ctx):
         embed.set_author(name=guild.name, icon_url=guild.icon.url)
     await ctx.send(embed=embed)
 
-@bot.command(aliases=['avatar'])
-async def av(ctx, member: discord.Member = None):
-    if not await check_admin(ctx):
-        return
-    if member is None:
-        member = ctx.author
-    if member.avatar is None:
-        await ctx.send(f'{member.mention} does not have an avatar.')
-    else:
-        await ctx.send(f'{member.mention}\'s avatar: {member.avatar.url}')
-
 @bot.command()
 async def ping(ctx):
     if not await check_admin(ctx):
         return
     await ctx.send(f'... `{bot.latency * 1000:.2f} ms`')
-
-async def send_messages(channel: discord.TextChannel, user: discord.Member):
-    while user.id in active_users and active_users[user.id]['active']:
-        for message in messages:
-            if user.id not in active_users or not active_users[user.id]['active']:
-                return
-            try:
-                await channel.send(f'{user.mention} {message}')
-            except discord.Forbidden:
-                await channel.send(f"Couldn't send message to {user.mention}.")
-                return
-            await asyncio.sleep(4)
-@bot.command()
-async def say(ctx, member: discord.Member = None, *, message: str = None):
-    if not await check_admin(ctx):
-        return
-
-    if member is None:
-        await ctx.send("Usage: `$say [user] [message]` or `$say [user] \"message\"`")
-        return
-
-    if message is None:
-        await ctx.send("Usage: `$say [user] [message]` or `$say [user] \"message\"`")
-        return
-
-    if message.startswith('"') and message.endswith('"'):
-        message = message[1:-1]
-        await ctx.message.delete()
-        await ctx.send(f'{member.mention} {message}')
-    else:
-        await ctx.message.delete()
-        await ctx.send(f'{member.mention} {message}')
-    
-@bot.command()
-async def gay(ctx, *user_mentions: discord.Member):
-    if not await check_admin(ctx):
-        return
-
-    if not user_mentions:
-        message = f"# <@{ctx.author.id}> = {random.randint(0, 100)}% :rainbow_flag:"
-    else:
-        mentions = ' '.join(member.mention for member in user_mentions)
-        message = f"# {mentions} = {random.randint(0, 100)}% :rainbow_flag:"
-
-    try:
-        await ctx.send(message)
-    except discord.Forbidden:
-        await ctx.send("Could not send the message. Permission denied.")
-    except discord.HTTPException:
-        await ctx.send("An error occurred while sending the message.")
-
-@bot.command()
-async def ship(ctx, user1: discord.Member, user2: discord.Member):
-    if user1 is None or user2 is None:
-        await ctx.send("Usage: `$ship @user1 @user2`")
-        return
-
-    percentage = random.randint(0, 100)
-    message = f"{user1.mention} 💕 {user2.mention} = {percentage}% "
-
-    try:
-        await ctx.send(message)
-    except discord.Forbidden:
-        await ctx.send("Could not send the message. Permission denied.")
-    except discord.HTTPException:
-        await ctx.send("An error occurred while sending the message.")
-
-ROLE_ID = 1270092407546974320
-@bot.command()
-async def rmv(ctx, member: discord.Member = None):
-    if not await check_admin(ctx):
-        return
-    if member is None:
-        await ctx.send("Usage: `$rmv [user]`")
-        return
-
-    if not ctx.guild.me.guild_permissions.manage_roles:
-        await ctx.send("I don't have permission to manage roles.")
-        return
-
-    role = discord.utils.get(ctx.guild.roles, id=ROLE_ID)
-    if role not in ctx.author.roles:
-        await ctx.send("You do not have the required role to remove roles.")
-        return
-
-    if role not in member.roles:
-        await ctx.send(f"{member.mention} does not have the role to remove.")
-        return
-
-    try:
-        await member.remove_roles(role)
-        await ctx.message.delete()
-    except discord.Forbidden:
-        await ctx.send("I do not have permission to remove roles.")
-    except discord.HTTPException:
-        await ctx.send("An error occurred while removing the role.")
 
 @bot.command()
 async def win(ctx, member: discord.Member = None):
